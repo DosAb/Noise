@@ -36,10 +36,15 @@ export default function Background()
     })
 
     const colors = useControls({
-        Color: {  r: 28, b: 135, g: 135, a: 1, onChange:(value) =>{(
+        Color: {  r: 206, b: 255, g: 255, a: 1, onChange:(value) =>{(
             meshRef.current.material.uniforms.uColor.value.r = value.r / 255,
             meshRef.current.material.uniforms.uColor.value.g = value.g / 255,
             meshRef.current.material.uniforms.uColor.value.b = value.b / 255
+        )} },
+        SecondCold: { r: 0, b: 122, g: 122, a: 1, onChange:(value) =>{(
+            meshRef.current.material.uniforms.uSecondColor.value.r = value.r / 255,
+            meshRef.current.material.uniforms.uSecondColor.value.g = value.g / 255,
+            meshRef.current.material.uniforms.uSecondColor.value.b = value.b / 255
         )} },
         BackgroundColor: { r: 0, b: 0, g: 0, a: 1, onChange:(value) =>{(
             meshRef.current.material.uniforms.uBackgroundColor.value.r = value.r / 255,
