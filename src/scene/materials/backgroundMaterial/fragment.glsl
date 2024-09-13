@@ -3,6 +3,8 @@ precision lowp float;
 uniform float uTime;
 uniform vec2 uResolution;
 uniform vec3 uColor;
+uniform vec3 uSecondColor;
+uniform vec3 uBackgroundColor;
 uniform sampler2D uNoiseTexture;
 varying vec2 vUv;
 
@@ -28,28 +30,76 @@ vec2 rotateUV(vec2 uv, float rotation)
     );
 }
 
+#define PI 3.1415926
+#define s(a) sin(a)
+#define c(a) cos(a)
+#define t uTime 
+
+#define iterations 1
+#define interationFpr 2
 
 
 void main() {
-    vec2 uv = vUv;
-    // vec2 p = gl_FragCoord.xy/uResolution.y - vec2(.9,.5);
+    // vec2 uv = vUv;
 
-    float mr = min(uResolution.x, uResolution.y);
-    vec2 uv2 = (gl_FragCoord.xy * 2.0 - uResolution.xy) / mr;
+    // vec2 p=(2.0*gl_FragCoord.xy-uResolution.xy)/max(uResolution.x,uResolution.y);
+	// for(int i=1;i<10;i++)
+	// {
+	// 	vec2 newp=p;
+	// 	newp.x+=0.6 / float(i) * sin(float(i) * p.y + uTime + 0.3 * float(i)) + 1.0;
+	// 	newp.y+=0.6 / float(i) * sin(float(i) * p.x + uTime + 0.3 * float(i+10)) - 1.4;
+	// 	p=newp;
+	// }
+	// vec3 col=vec3(1.0,1.0-(sin(p.y)),sin(p.x+p.y));
 
-    float d2 = -uTime * 0.5;
-    float a = 0.0;
-    for (float i = 0.0; i < 8.0; ++i) {
-        a += cos(i - d2 - a * uv2.x);
-        d2 += sin(uv2.y * i + a);
+
+    // float x = uv.x;
+    // float y = uv.y * 0.5;
+    // float firstCalc = x * PI * 2.0 + y * PI * sin(cos(t * 0.7 - y) + sin(y - t * 0.2) * 12.0) * 0.3 - PI / 1.0;
+    // float f = (sin(firstCalc) - y) * (y * PI + 0.3);
+
+    // float strength = sin(vUv.x * 10.0);
+
+    vec4 noiseTexture = texture2D(uNoiseTexture, fract(vUv * 30.0 + uTime * 100.0));   
+    // vec3 color = vec3(f * 0.,f * 1.0, f * 0.5 - y * sin(x * PI * 2.0 + t));
+    // color = color * col;
+	vec2 uv = gl_FragCoord.xy / uResolution.xy;
+    uv.x *= 1.3;
+    uv.x -= 0.35;
+    uv.y *= 0.3;
+    uv.y += 0.5;
+
+	float res = 1.;
+    for (int i = 0; i < iterations; i++) {
+        res += cos(uv.y * 9.345 - uTime * 4.0 + cos(res * 1.234) * 0.2 + cos(uv.x * 20.2345 + cos(uv.y * 17.234)) ) + cos(uv.x*1.345);
     }
-    d2 += uTime * 0.5;
-    vec3 color = vec3(cos(uv2 * vec2(d2, a)) * 0.6 + 0.4, cos(a + d2) * 0.5 + 0.5);
-    color = cos(color * cos(vec3(d2, a, 2.5)) * 0.5 + 0.5);
+    vec3 c = mix(vec3(1.,0.,0.),
+                 vec3(.6,.2,.2),
+                 cos(res+cos(uv.y*24.3214)*.1+cos(uv.x*0.324+uTime*4.)+uTime)*.5+.5);
+    
+    c = mix(c,
+            vec3(0.),
+            clamp( (length(uv-.5 + cos(uTime+uv.yx * 0.34 + uv.xy * res) * 0.1 ) * 5.0 - 0.4) , 0.0, 1.0));
 
 
-    vec4 noiseTexture = texture2D(uNoiseTexture, fract(uv * 30.0 + uTime * 100.0));    
+	float res2 = 1.;
+    for (int i = 0; i < interationFpr; i++) {
+        res2 += cos(uv.y * 9.345 - uTime * 2.0 + cos(res * 1.234) * 0.2 + cos(uv.x * 10.2345 + cos(uv.y * 20.234)) ) + cos(uv.x * 1.345);
+    }
+        
 
-    gl_FragColor = vec4(vec3(color), 1.0 - noiseTexture.a);
+	vec3 c2 = mix(vec3(1.,0.,0.),
+                 vec3(.6,.2,.2),
+                 cos(res2+cos(uv.y * 2.3214) * 1.1 + cos( uv.x * 0.324 + uTime*4.) +uTime) * 0.2 + .8);
+    
+    c2 = mix(c2,
+            vec3(0.),
+            clamp( (length(uv-.5 + cos(uTime+uv.yx * 0.34+uv.xy*res2)*.1 )*5.-.4) , 0., 1.));
+
+    vec3 finalColor = mix(vec3(uBackgroundColor), uColor, c.r * 1.5);
+    finalColor = mix(finalColor, uSecondColor, c2.r);
+
+
+    gl_FragColor = vec4(vec3(c.r), 1.0 - noiseTexture.a);
     // gl_FragColor = vec4(vec3(col.g, col.g, col.g), 1.0 - noiseTexture.a);
 }
