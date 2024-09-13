@@ -33,7 +33,7 @@ const vec3 luma = vec3(0.2126, 0.7152, 0.0722);
 
 float f(in vec2 p)
 {
-    return sin(p.x+sin(p.y+uTime*0.1)) * sin(p.y*p.x*0.1+uTime*0.2);
+    return sin(p.x + sin(p.y + uTime * 0.2)) * sin(p.y * p.x * 0.1 + uTime * 0.2);
 }
 
 
@@ -41,40 +41,41 @@ float f(in vec2 p)
 vec2 field(in vec2 p)
 {
 	vec2 ep = vec2(.05,0.);
-    vec2 rz= vec2(0);
-	for( int i=0; i<7; i++ )
+    vec2 rz= vec2(0.0);
+	for( int i=0; i<3; i++ )
 	{
 		float t0 = f(p);
 		float t1 = f(p + ep.xy);
 		float t2 = f(p + ep.yx);
-        vec2 g = vec2((t1-t0), (t2-t0))/ep.xx;
+        vec2 g = vec2((t1 - t0), (t2 - t0)) / ep.xx;
 		vec2 t = vec2(-g.y,g.x);
         
-        p += .9*t + g*0.3;
+        p += .9 * t + g * 0.3;
         rz= t;
 	}
     
     return rz;
 }
 
-float segm(in vec2 p, in vec2 a, in vec2 b) //from iq
-{
-	vec2 pa = p - a;
-	vec2 ba = b - a;
-	float h = clamp(dot(pa,ba)/dot(ba,ba), 0., 1.);
-	return length(pa - ba*h)*20. * arrow_density;
-}
-
 
 
 void main() {
 
-    vec2 p = gl_FragCoord.xy / uResolution.xy-0.5;
-	p.x *= uResolution.x/uResolution.y;
-    p *= 6.;
-	
+    vec2 p = gl_FragCoord.xy / uResolution.xy - 0.5;
+	p.x *= uResolution.x / uResolution.y;
+    p.y *= 8.;
+    p.x *= 5.;
+    p.x += 3.5;
+
+    
+    float strength = smoothstep(0.2, 0.5, (vUv.x -0.2));
     vec2 fld = field(p);
-    vec3 col = sin(vec3(-.3,0.1,0.5)+fld.x-fld.y)*0.65+0.35;
+    fld.x *= strength;
+    // fld.x = smoothstep(0.5, 1.0, fld.x);
+
+    vec3 col = mix(uBackgroundColor, uColor, fld.x);
+    // vec3 col = (vec3(uColor) + fld.x ) * 0.65 + 0.35;
+    // col *= vUv.x * 0.5 - 0.2;
 
     vec4 noiseTexture = texture2D(uNoiseTexture, fract(vUv * 30.0 + uTime * 100.0));   
 
@@ -91,6 +92,8 @@ void main() {
 
     float c = cos(res+cos(uv.y*24.3214)*.1+cos(uv.x*0.324+uTime*4.)+uTime)*.5+.5;
     c = 1.0 - clamp( (length(uv-.5 + cos(uTime+uv.yx * 0.34 + uv.xy * res) * 0.1 ) * 5.0 - 0.4) , 0.0, 1.0);
+
+    col = mix(col, uSecondColor, c + fld.x * 0.5);
 
 
 
