@@ -100,6 +100,6 @@ void main() {
     finalColor = mix(finalColor, uSecondColor, c2.r);
 
 
-    gl_FragColor = vec4(vec3(c.r), 1.0 - noiseTexture.a);
+    gl_FragColor = vec4(vec3(finalColor), 1.0 - noiseTexture.a);
     // gl_FragColor = vec4(vec3(col.g, col.g, col.g), 1.0 - noiseTexture.a);
 }
