@@ -4,6 +4,7 @@ uniform float uTime;
 uniform vec2 uResolution;
 uniform vec3 uColor;
 uniform vec3 uSecondColor;
+uniform vec3 uInnerColor;
 uniform vec3 uBackgroundColor;
 uniform sampler2D uNoiseTexture;
 varying vec2 vUv;
@@ -90,14 +91,17 @@ void main() {
     float outerLayer = clamp((col2.r), 0.0, 0.8) - removeLayer;
     outerLayer = smoothstep(0.0, 0.5, outerLayer);
 
+    float innerLayer = smoothstep(1.2, 1.6, col2.r);
+
     vec4 noiseTexture = texture2D(uNoiseTexture, fract(vUv * 30.0 + uTime * 100.0));   
-    float randomNoise = random(vec2((vUv.x + sin(vUv.y)) * .1, uTime)) * 0.6 - 0.5 ;
+    float randomNoise = random(vec2((vUv.x + sin(uv2.y)) * .1, sin(uTime))) * 0.6 - 0.5 ;
 
 
     float mask = col2.r * 0.8;
 
     vec3 finalColor = mix(uSecondColor, uColor, mask);
     finalColor = mix(finalColor, uSecondColor, outerLayer);
+    finalColor = mix(finalColor, uInnerColor, innerLayer);
     finalColor = mix(uBackgroundColor, finalColor, mask);
     // finalColor.r *= 0.6;
     // finalColor = mix(finalColor, vec3(1.0, 0.0, 0.0), outerLayer);
@@ -106,6 +110,6 @@ void main() {
 
 
 
-    gl_FragColor = vec4(vec3(finalColor), 1.0 - noiseTexture.a);
+    gl_FragColor = vec4(vec3(finalColor), 1.0 - randomNoise);
     // gl_FragColor = vec4(vec3(col.g, col.g, col.g), 1.0 - noiseTexture.a);
 }
