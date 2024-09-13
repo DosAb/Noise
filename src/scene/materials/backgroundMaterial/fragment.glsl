@@ -21,48 +21,63 @@ float random(vec2 st)
 }
 
 
-vec2 rotateUV(vec2 uv, float rotation)
-{
-    float mid = 0.5;
-    return vec2(
-        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
-        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
-    );
-}
-
 #define PI 3.1415926
-#define s(a) sin(a)
-#define c(a) cos(a)
-#define t uTime 
 
 #define iterations 1
 #define interationFpr 2
 
+const float arrow_density = 1.5;
+const float arrow_length = .45;
+
+const vec3 luma = vec3(0.2126, 0.7152, 0.0722);
+
+float f(in vec2 p)
+{
+    return sin(p.x+sin(p.y+uTime*0.1)) * sin(p.y*p.x*0.1+uTime*0.2);
+}
+
+
+//---------------Field to visualize defined here-----------------
+vec2 field(in vec2 p)
+{
+	vec2 ep = vec2(.05,0.);
+    vec2 rz= vec2(0);
+	for( int i=0; i<7; i++ )
+	{
+		float t0 = f(p);
+		float t1 = f(p + ep.xy);
+		float t2 = f(p + ep.yx);
+        vec2 g = vec2((t1-t0), (t2-t0))/ep.xx;
+		vec2 t = vec2(-g.y,g.x);
+        
+        p += .9*t + g*0.3;
+        rz= t;
+	}
+    
+    return rz;
+}
+
+float segm(in vec2 p, in vec2 a, in vec2 b) //from iq
+{
+	vec2 pa = p - a;
+	vec2 ba = b - a;
+	float h = clamp(dot(pa,ba)/dot(ba,ba), 0., 1.);
+	return length(pa - ba*h)*20. * arrow_density;
+}
+
+
 
 void main() {
-    // vec2 uv = vUv;
 
-    // vec2 p=(2.0*gl_FragCoord.xy-uResolution.xy)/max(uResolution.x,uResolution.y);
-	// for(int i=1;i<10;i++)
-	// {
-	// 	vec2 newp=p;
-	// 	newp.x+=0.6 / float(i) * sin(float(i) * p.y + uTime + 0.3 * float(i)) + 1.0;
-	// 	newp.y+=0.6 / float(i) * sin(float(i) * p.x + uTime + 0.3 * float(i+10)) - 1.4;
-	// 	p=newp;
-	// }
-	// vec3 col=vec3(1.0,1.0-(sin(p.y)),sin(p.x+p.y));
-
-
-    // float x = uv.x;
-    // float y = uv.y * 0.5;
-    // float firstCalc = x * PI * 2.0 + y * PI * sin(cos(t * 0.7 - y) + sin(y - t * 0.2) * 12.0) * 0.3 - PI / 1.0;
-    // float f = (sin(firstCalc) - y) * (y * PI + 0.3);
-
-    // float strength = sin(vUv.x * 10.0);
+    vec2 p = gl_FragCoord.xy / uResolution.xy-0.5;
+	p.x *= uResolution.x/uResolution.y;
+    p *= 6.;
+	
+    vec2 fld = field(p);
+    vec3 col = sin(vec3(-.3,0.1,0.5)+fld.x-fld.y)*0.65+0.35;
 
     vec4 noiseTexture = texture2D(uNoiseTexture, fract(vUv * 30.0 + uTime * 100.0));   
-    // vec3 color = vec3(f * 0.,f * 1.0, f * 0.5 - y * sin(x * PI * 2.0 + t));
-    // color = color * col;
+
 	vec2 uv = gl_FragCoord.xy / uResolution.xy;
     uv.x *= 1.3;
     uv.x -= 0.35;
@@ -73,33 +88,12 @@ void main() {
     for (int i = 0; i < iterations; i++) {
         res += cos(uv.y * 9.345 - uTime * 4.0 + cos(res * 1.234) * 0.2 + cos(uv.x * 20.2345 + cos(uv.y * 17.234)) ) + cos(uv.x*1.345);
     }
-    vec3 c = mix(vec3(1.,0.,0.),
-                 vec3(.6,.2,.2),
-                 cos(res+cos(uv.y*24.3214)*.1+cos(uv.x*0.324+uTime*4.)+uTime)*.5+.5);
-    
-    c = mix(c,
-            vec3(0.),
-            clamp( (length(uv-.5 + cos(uTime+uv.yx * 0.34 + uv.xy * res) * 0.1 ) * 5.0 - 0.4) , 0.0, 1.0));
+
+    float c = cos(res+cos(uv.y*24.3214)*.1+cos(uv.x*0.324+uTime*4.)+uTime)*.5+.5;
+    c = 1.0 - clamp( (length(uv-.5 + cos(uTime+uv.yx * 0.34 + uv.xy * res) * 0.1 ) * 5.0 - 0.4) , 0.0, 1.0);
 
 
-	float res2 = 1.;
-    for (int i = 0; i < interationFpr; i++) {
-        res2 += cos(uv.y * 9.345 - uTime * 2.0 + cos(res * 1.234) * 0.2 + cos(uv.x * 10.2345 + cos(uv.y * 20.234)) ) + cos(uv.x * 1.345);
-    }
-        
 
-	vec3 c2 = mix(vec3(1.,0.,0.),
-                 vec3(.6,.2,.2),
-                 cos(res2+cos(uv.y * 2.3214) * 1.1 + cos( uv.x * 0.324 + uTime*4.) +uTime) * 0.2 + .8);
-    
-    c2 = mix(c2,
-            vec3(0.),
-            clamp( (length(uv-.5 + cos(uTime+uv.yx * 0.34+uv.xy*res2)*.1 )*5.-.4) , 0., 1.));
-
-    vec3 finalColor = mix(vec3(uBackgroundColor), uColor, c.r * 1.5);
-    finalColor = mix(finalColor, uSecondColor, c2.r);
-
-
-    gl_FragColor = vec4(vec3(finalColor), 1.0 - noiseTexture.a);
+    gl_FragColor = vec4(vec3(col), 1.0 - noiseTexture.a);
     // gl_FragColor = vec4(vec3(col.g, col.g, col.g), 1.0 - noiseTexture.a);
 }
