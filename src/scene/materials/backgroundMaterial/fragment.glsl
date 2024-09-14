@@ -1,6 +1,7 @@
 precision lowp float;
 
 uniform float uTime;
+uniform vec2 uMouse;
 uniform vec2 uResolution;
 uniform vec3 uColor;
 uniform vec3 uSecondColor;
@@ -24,12 +25,11 @@ float random(vec2 st)
 
 #define PI 3.1415926
 
-#define iterations 1
-#define interationFpr 2
 
 #define layers 6 //int how many layers
 #define speed .5 //float speed multiplyer
 #define scale 1.2 //float scale multiplyer
+
 vec3 hash( vec3 p )
 {
 	p = vec3( dot(p,vec3(127.1,311.7, 74.7)),
@@ -39,6 +39,7 @@ vec3 hash( vec3 p )
 
 	return p;
 }
+
 float noise( in vec3 p )
 {
     vec3 i = floor( p );
@@ -61,28 +62,30 @@ float noise( in vec3 p )
 void main() {
     vec2 uv2 = (gl_FragCoord.xy-uResolution.xy-.5)/uResolution.y;
     uv2.x *= 2.0;
+    uv2.y *= 1.2;
     uv2.x += 1.;
 
-    float t = (uTime * speed) + 20.0;
+    float t = (uTime * speed + uMouse.x * 1.0) + 20.0;
     float strength = smoothstep(0.2, 0.5, (vUv.x -0.2 + noise(vec3(vUv, 1.0))));
-
     float strength2 = 1.0 - smoothstep(0.2, 0.5, (vUv.x * 3.0 - 2.5 + noise(vec3(vUv * 2.0, uTime * 0.2)) * 0.5));
+    float removeTopStrength = 1.0 - smoothstep(0.2, 0.5, (vUv.y * vUv.x -uMouse.x * 0.5 + noise(vec3(vec2(vUv.y * 2.0, vUv.x * 3.0), 1.0))));
 
     uv2 *= scale;
     float h = noise(vec3(uv2*2.,t));
     //uv distortion loop 
     for (int n = 1; n < layers; n++){
         float i = float(n);
-        uv2 -= vec2(0.6 / i * sin(i * uv2.y+i + t*5. + h * i) + 0.8, 0.4 / i * sin(uv2.x+4.-i+h + t*5. + 0.3 * i) + 1.6);
+        uv2 -= vec2(0.6 / i * sin(i * uv2.y + i + t*5. + h * i) + 0.8, 0.4 / i * sin(uv2.x+4.-i+h + t*5. + 0.3 * i) + 1.6);
     }
 
-    uv2 -= vec2(1.2 * sin(uv2.x + t + h) + 1.8, 0.4 * sin(uv2.y + t + 0.3 *h) + 1.6);
+    uv2 -= vec2(1.2 * sin(uv2.x + t + h) + 1.8, 0.4 * sin(uv2.y + t + 0.3 * h) + 1.6);
 
 
     // Time varying pixel color
     vec3 col2 = vec3( sin(uv2.x) * 0.8 + 0.6 , 0.0, 0.0);
     col2 *= strength;
     col2 *= strength2;
+    // col2 *= removeTopStrength;
 
     float removeLayer = smoothstep(0.2, 0.4, col2.r);
 
@@ -103,13 +106,6 @@ void main() {
     finalColor = mix(finalColor, uSecondColor, outerLayer);
     finalColor = mix(finalColor, uInnerColor, innerLayer);
     finalColor = mix(uBackgroundColor, finalColor, mask);
-    // finalColor.r *= 0.6;
-    // finalColor = mix(finalColor, vec3(1.0, 0.0, 0.0), outerLayer);
-    // finalColor = mix( finalColor, uSecondColor, outerLayer);
-
-
-
 
     gl_FragColor = vec4(vec3(finalColor), 1.0 - randomNoise);
-    // gl_FragColor = vec4(vec3(col.g, col.g, col.g), 1.0 - noiseTexture.a);
 }

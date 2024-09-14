@@ -15,6 +15,17 @@ export default function Background()
 
     const noiseTexture = useTexture("./noiseTexture.png")
 
+    const mouse = new THREE.Vector2(0, 0)
+
+    const lerpedVector = new THREE.Vector2(0, 0)
+    
+    // const canvas = useThree()
+    // const sizes = canvas.size
+    window.addEventListener('mousemove', (event)=>{
+        mouse.x = (event.clientX / window.innerWidth) 
+        mouse.y = ((event.clientY / window.innerHeight))
+    })
+
 
     const uniforms = {
         uTime: {value: 0},
@@ -23,18 +34,19 @@ export default function Background()
         uSecondColor: {value: new THREE.Color("#CEFFFF")},
         uInnerColor: {value: new THREE.Color("#CEFFFF")},
         uBackgroundColor: {value: new THREE.Color("#000000")},
+        uMouse: {value: lerpedVector},
         uNoiseTexture: {value: noiseTexture}
     }
 
-    const {innerRadius} = useControls('innerRadius', {
-        innerRadius:{
-            value: 2,
-            min: 0,
-            max: 10,
-            step: 0.01,
-            // onChange: (value)=>{(meshRef.current.material.uniforms.uColor.value = value )}
-        }
-    })
+    // const {innerRadius} = useControls('innerRadius', {
+    //     innerRadius:{
+    //         value: 2,
+    //         min: 0,
+    //         max: 10,
+    //         step: 0.01,
+    //         // onChange: (value)=>{(meshRef.current.material.uniforms.uColor.value = value )}
+    //     }
+    // })
 
     const colors = useControls({
         Color: {  r: 206, b: 255, g: 255, a: 1, onChange:(value) =>{(
@@ -61,7 +73,11 @@ export default function Background()
 
     useFrame((state, delta)=>{
         meshRef.current.material.uniforms.uTime.value += delta * 0.3
+
+        lerpedVector.x += (mouse.x - lerpedVector.x) / 30
     })
+
+
 
     window.addEventListener('resize', ()=>{
         meshRef.current.material.uniforms.uResolution.value.x = window.innerWidth
@@ -71,7 +87,7 @@ export default function Background()
     return <>
         <mesh ref={meshRef} >
             <planeGeometry args={[1, 1]} />
-            <shaderMaterial fragmentShader={fragmentShader} transparent={true} vertexShader={vertexShader} uniforms={uniforms} />
+            <shaderMaterial precision="lowp" fragmentShader={fragmentShader} transparent={true} vertexShader={vertexShader} uniforms={uniforms} />
         </mesh>
     </>
 }
