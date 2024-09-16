@@ -75,6 +75,7 @@ export default function Background()
         meshRef.current.material.uniforms.uTime.value += delta * 0.3
 
         lerpedVector.x += (mouse.x - lerpedVector.x) / 30
+        lerpedVector.y += (mouse.y - lerpedVector.y) / 30
     })
 
 
