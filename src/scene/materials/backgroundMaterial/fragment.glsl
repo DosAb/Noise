@@ -60,46 +60,24 @@ float noise( in vec3 p )
 
 
 void main() {
-    float strength = smoothstep(0.2, 0.5, (vUv.x -0.2 + noise(vec3(vUv, 1.0))));
-    float strength2 = 1.0 - smoothstep(0.0, 0.8, (vUv.x * 3.0 - 2.5 + noise(vec3(vUv * 2.0, uTime * 0.2)) * 0.5));
-    float removeTopStrength = 1.0 - smoothstep(0.2, 0.5, (vUv.y - ((1.0 - uMouse.y -0.2) * 2.0) * 0.3 + noise(vec3(vec2(vUv.y * 1.2, vUv.x * 1.4 + 1.3), 1.0))));
-
-
-    vec2 uv = (gl_FragCoord.xy-uResolution.xy-.5)/uResolution.y;
-    uv.x *= 2.0;
-    uv.y *= 1.2;
-    uv.x += 1.;
-
-    float t1 = (uTime * speed + uMouse.x * 0.0) + 20.0;
-
-    uv *= scale;
-    float h1 = noise(vec3(uv*2.,t1));
-    //uv distortion loop 
-    for (int n = 1; n < layers; n++){
-        float i = float(n);
-        uv -= vec2(0.6 / i * sin(i * uv.y + i + t1*5. + h1 * i) + 0.8, 0.4 / i * sin(uv.x+4.-i+h1 + t1*5. + 0.3 * i) + 1.6);
-    }
-
-    uv -= vec2(1.2 * sin(uv.x + t1 + h1) + 1.8, 0.4 * sin(uv.y + t1 + 0.3 * h1) + 1.6);
-
-    vec3 col = vec3( cos(uv.x) * 0.8 + 0.6 , 0.0, 0.0);
-    col *= strength;
-
+    float strength = smoothstep(0.2, 0.5, (vUv.x * 3.0 - 1.0 - (uMouse.x * 0.5) + noise(vec3(vUv * 2.0, 1.0))));
+    float strength2 = 1.0 - smoothstep(0.2, 0.5, (vUv.x * 3.0 - 2.5 + noise(vec3(vUv * 2.0, uTime * 0.2)) * 0.5));
+    float removeTopStrength = 1.0 - smoothstep(0.2, 0.5, (vUv.y - ((1.0 - uMouse.y - 0.5) * 4.0 + 1.0) * 0.3 + noise(vec3(vec2(vUv.y * 2.0, vUv.x * 6.0 + 1.3), uTime * 0.4)) * 0.3));
 
     vec2 uv2 = (gl_FragCoord.xy-uResolution.xy-.5)/uResolution.y;
     uv2.x *= 2.0;
     uv2.y *= 1.2;
     uv2.x += 1.;
 
-    float t = (uTime * speed + uMouse.x * 0.5) + 20.0;
+    float t = (uTime * speed + uMouse.x) + 20.0;
 
 
     uv2 *= scale;
-    float h = noise(vec3(uv2*2.,t));
+    float h = noise(vec3(uv2 * 2.0,t));
     //uv distortion loop 
     for (int n = 1; n < layers; n++){
         float i = float(n);
-        uv2 -= vec2(0.6 / i * sin(i * uv2.y + i + t*5. + h * i) + 0.8, 0.4 / i * sin(uv2.x+4.-i+h + t*5. + 0.3 * i) + 1.6);
+        uv2 -= vec2(0.6 / i * sin(i * uv2.y + i + t * 5.0 + h * i) + 0.8, 0.4 / i * sin(uv2.x + 4.0-i+h + t*5. + 0.3 * i) + 2.6);
     }
 
     uv2 -= vec2(1.2 * sin(uv2.x + t + h) + 1.8, 0.4 * sin(uv2.y + t + 0.3 * h) + 1.6);
@@ -113,10 +91,9 @@ void main() {
 
     float removeLayer = smoothstep(0.2, 0.4, col2.r);
 
-    float backgroundLayer = col2.r;
-
     float outerLayer = clamp((col2.r), 0.0, 0.8) - removeLayer;
     outerLayer = smoothstep(0.0, 0.5, outerLayer);
+
 
     float innerLayer = smoothstep(1.2, 1.6, col2.r);
 
@@ -130,8 +107,6 @@ void main() {
     finalColor = mix(finalColor, uSecondColor, outerLayer);
     finalColor = mix(finalColor, uInnerColor, innerLayer);
     finalColor = mix(uBackgroundColor, finalColor, mask);
-
-    float mixedColor = col.r * mask;
 
     gl_FragColor = vec4(vec3(finalColor), 1.0 - randomNoise);
 }

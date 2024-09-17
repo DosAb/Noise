@@ -17,7 +17,7 @@ export default function Background()
 
     const mouse = new THREE.Vector2(0, 0)
 
-    const lerpedVector = new THREE.Vector2(0, 0)
+    const lerpedVector = new THREE.Vector2(1.0, 0.5)
     
     // const canvas = useThree()
     // const sizes = canvas.size
@@ -74,8 +74,8 @@ export default function Background()
     useFrame((state, delta)=>{
         meshRef.current.material.uniforms.uTime.value += delta * 0.3
 
-        lerpedVector.x += (mouse.x - lerpedVector.x) / 30
-        lerpedVector.y += (mouse.y - lerpedVector.y) / 30
+        lerpedVector.x += (mouse.x - lerpedVector.x) / 50
+        lerpedVector.y += (mouse.y - lerpedVector.y) / 50
     })
 
 
