@@ -2,6 +2,7 @@ precision lowp float;
 
 uniform float uTime;
 uniform vec2 uMouse;
+uniform float uSpeed;
 uniform vec2 uResolution;
 uniform vec3 uColor;
 uniform vec3 uSecondColor;
@@ -60,6 +61,7 @@ float noise( in vec3 p )
 
 
 void main() {
+
     float strength = smoothstep(0.2, 0.5, (vUv.x * 3.0 - 1.0 - (uMouse.x * 0.5) + noise(vec3(vUv * 2.0, 1.0))));
     float strength2 = 1.0 - smoothstep(0.2, 0.5, (vUv.x * 3.0 - 2.5 + noise(vec3(vUv * 2.0, uTime * 0.2)) * 0.5));
     float removeTopStrength = 1.0 - smoothstep(0.2, 0.5, (vUv.y - ((1.0 - uMouse.y - 0.5) * 4.0 + 1.0) * 0.3 + noise(vec3(vec2(vUv.y * 2.0, vUv.x * 6.0 + 1.3), uTime * 0.4)) * 0.3));

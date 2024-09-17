@@ -30,23 +30,24 @@ export default function Background()
     const uniforms = {
         uTime: {value: 0},
         uResolution: {value: new THREE.Vector2(window.innerWidth, window.innerHeight)},
-        uColor: {value: new THREE.Color("#CEFFFF")},
-        uSecondColor: {value: new THREE.Color("#CEFFFF")},
-        uInnerColor: {value: new THREE.Color("#CEFFFF")},
+        uColor: {value: new THREE.Color("#ceffff")},
+        uSecondColor: {value: new THREE.Color("#007a7a")},
+        uInnerColor: {value: new THREE.Color("#007a7a")},
         uBackgroundColor: {value: new THREE.Color("#000000")},
+        uSpeed: {value: 1},
         uMouse: {value: lerpedVector},
         uNoiseTexture: {value: noiseTexture}
     }
 
-    // const {innerRadius} = useControls('innerRadius', {
-    //     innerRadius:{
-    //         value: 2,
-    //         min: 0,
-    //         max: 10,
-    //         step: 0.01,
-    //         // onChange: (value)=>{(meshRef.current.material.uniforms.uColor.value = value )}
-    //     }
-    // })
+    const speed = useControls({
+        speed:{
+            value: 1,
+            min: 0,
+            max: 10,
+            step: 0.01,
+            onChange:(value) =>{(meshRef.current.material.uniforms.uSpeed.value = value)}
+        }
+    })
 
     const colors = useControls({
         Color: {  r: 206, b: 255, g: 255, a: 1, onChange:(value) =>{(
@@ -74,8 +75,8 @@ export default function Background()
     useFrame((state, delta)=>{
         meshRef.current.material.uniforms.uTime.value += delta * 0.3
 
-        lerpedVector.x += (mouse.x - lerpedVector.x) / 50
-        lerpedVector.y += (mouse.y - lerpedVector.y) / 50
+        lerpedVector.x += (mouse.x - lerpedVector.x) /(30 * (1 / meshRef.current.material.uniforms.uSpeed.value))
+        lerpedVector.y += (mouse.y - lerpedVector.y) /(30 * (1 / meshRef.current.material.uniforms.uSpeed.value))
     })
 
 
