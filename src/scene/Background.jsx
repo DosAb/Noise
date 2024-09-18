@@ -1,6 +1,5 @@
 import { useRef, useEffect, useMemo } from 'react'
 import { events, useFrame } from '@react-three/fiber'
-import { useTexture } from '@react-three/drei'
 import { useControls } from 'leva'
 import * as THREE from 'three'
 import gsap from 'gsap'
@@ -15,7 +14,6 @@ export default function Background()
     const mm = gsap.matchMedia()
 
     const meshRef = useRef()
-    const noiseTexture = useTexture("./noiseTexture.png")
     const mouse = new THREE.Vector2(0, 0)
     const lerpedVector = new THREE.Vector2(1.0, 0.5)
     
@@ -36,7 +34,6 @@ export default function Background()
         uMobile: {value: 0},
         uRandom: {value: Math.random()},
         uMouse: {value: lerpedVector},
-        uNoiseTexture: {value: noiseTexture}
     }
 
     const speed = useControls({
@@ -83,7 +80,7 @@ export default function Background()
         meshRef.current.material.uniforms.uResolution.value.x = window.innerWidth
         meshRef.current.material.uniforms.uResolution.value.y = window.innerHeight
     })
-    
+
     useEffect(()=>{
         mm.add("(min-width: 426px)", () => {
             console.log("not mobile")

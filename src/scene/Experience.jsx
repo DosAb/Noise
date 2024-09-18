@@ -8,10 +8,9 @@ export default function Experience()
     
     return <>
     <Canvas
-        dpr={0.7} //pixelRatio
+        dpr={1} //pixelRatio
         gl={{ 
             antialias: false,
-            outputColorSpace: THREE.SRGBColorSpace,
             alpha: true,
         }} // renderer
         

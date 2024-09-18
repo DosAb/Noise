@@ -1,4 +1,7 @@
-precision lowp float;
+#define PI 3.1415926
+#define layers 6 //int how many layers
+#define speed .5 //float speed multiplyer
+#define scale 1.2 //float scale multiplyer
 
 uniform float uTime;
 uniform float uMobile;
@@ -12,25 +15,11 @@ uniform vec3 uBackgroundColor;
 uniform sampler2D uNoiseTexture;
 varying vec2 vUv;
 
-mat2 m(float a){float c=cos(a), s=sin(a);return mat2(c,-s,s,c);}
-float map(vec3 p){
-    p.xz*= m(uTime*0.4);p.xy*= m(uTime*0.3);
-    vec3 q = p*2.+uTime;
-    return length(p+vec3(sin(uTime*0.7)))*log(length(p)+1.) + sin(q.x+sin(q.z+sin(q.y)))*0.5 - 1.;
-}
 
 float random(vec2 st)
 {
     return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
-
-
-#define PI 3.1415926
-
-
-#define layers 6 //int how many layers
-#define speed .5 //float speed multiplyer
-#define scale 1.2 //float scale multiplyer
 
 vec2 rotateUV(vec2 uv, float rotation)
 {
@@ -118,13 +107,10 @@ void main() {
     float outerLayer = clamp((col2.r), 0.0, 0.8) - removeLayer;
     outerLayer = smoothstep(0.0, 0.5, outerLayer);
 
-    float newLayer = outerLayer;
-
     float innerLayer = smoothstep(1.2, 1.6, col2.r);
 
     vec4 noiseTexture = texture2D(uNoiseTexture, fract(vUv * 30.0 + uTime * 100.0));   
     float randomNoise = random(vec2((vUv.x + sin(uv2.y)) * .1, sin(uTime))) * 0.6 - 0.5 ;
-
 
     float mask = col2.r * 0.8;
 
