@@ -1,6 +1,7 @@
 precision lowp float;
 
 uniform float uTime;
+uniform float uMobile;
 uniform vec2 uMouse;
 uniform float uSpeed;
 uniform vec2 uResolution;
@@ -30,6 +31,15 @@ float random(vec2 st)
 #define layers 6 //int how many layers
 #define speed .5 //float speed multiplyer
 #define scale 1.2 //float scale multiplyer
+
+vec2 rotateUV(vec2 uv, float rotation)
+{
+    float mid = 0.5;
+    return vec2(
+        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
+    );
+}
 
 vec3 hash( vec3 p )
 {
@@ -65,6 +75,12 @@ void main() {
     float strength = smoothstep(0.2, 0.5, (vUv.x * 3.0 - 1.0 - (uMouse.x * 0.5) + noise(vec3(vUv * 2.0, 1.0))));
     float strength2 = 1.0 - smoothstep(0.2, 0.5, (vUv.x * 3.0 - 2.5 + noise(vec3(vUv * 2.0, uTime * 0.2)) * 0.5));
     float removeTopStrength = 1.0 - smoothstep(0.2, 0.5, (vUv.y - ((1.0 - uMouse.y - 0.5) * 4.0 + 1.0) * 0.3 + noise(vec3(vec2(vUv.y * 2.0, vUv.x * 6.0 + 1.3), uTime * 0.4)) * 0.3));
+    
+    vec2 rotatedUvStr1 = rotateUV(vUv, 5.7);
+    vec2 rotatedUvStr2 = rotateUV(vUv, 5.8);
+
+    float mobileStrength = smoothstep(0.2, 0.5, (rotatedUvStr1.x * 3.0 - 0.8 + noise(vec3(rotatedUvStr1 * 2.0, 1.0))));
+    float mobileStrength2 = 1.0 - smoothstep(0.2, 0.5, (rotatedUvStr2.x * 2.0 - 1.2 + noise(vec3(vec2(rotatedUvStr2.x * 2.0, rotatedUvStr2.y * 2.0 + 4.7), uSpeed)) * 0.5));
 
     vec2 uv2 = (gl_FragCoord.xy-uResolution.xy-.5)/uResolution.y;
     uv2.x *= 2.0;
@@ -87,8 +103,14 @@ void main() {
 
     // Time varying pixel color
     vec3 col2 = vec3( sin(uv2.x) * 0.8 + 0.6 , 0.0, 0.0);
-    col2 *= strength;
-    col2 *= strength2;
+    if(uMobile == 1.0)
+    {
+        col2 *= mobileStrength;
+        col2 *= mobileStrength2;
+    }else{
+        col2 *= strength;
+        col2 *= strength2;
+    }
     col2 *= removeTopStrength;
 
     float removeLayer = smoothstep(0.2, 0.4, col2.r);
@@ -96,6 +118,7 @@ void main() {
     float outerLayer = clamp((col2.r), 0.0, 0.8) - removeLayer;
     outerLayer = smoothstep(0.0, 0.5, outerLayer);
 
+    float newLayer = outerLayer;
 
     float innerLayer = smoothstep(1.2, 1.6, col2.r);
 
@@ -109,6 +132,8 @@ void main() {
     finalColor = mix(finalColor, uSecondColor, outerLayer);
     finalColor = mix(finalColor, uInnerColor, innerLayer);
     finalColor = mix(uBackgroundColor, finalColor, mask);
+
+    float alpha = (sin(vUv.y * PI * 6.0)); // alpha = 1.;
 
     gl_FragColor = vec4(vec3(finalColor), 1.0 - randomNoise);
 }
