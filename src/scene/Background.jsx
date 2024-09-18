@@ -81,6 +81,31 @@ export default function Background()
         meshRef.current.material.uniforms.uResolution.value.y = window.innerHeight
     })
 
+    function changeBackgroundColor()
+    {
+        gsap.to(meshRef.current.material.uniforms.uColor.value, {
+            duration: 1,
+            ease: "power2.in",
+            r: 92 / 255,
+            g: 240 / 255,
+            b: 240 / 255
+        })
+        gsap.to(meshRef.current.material.uniforms.uSecondColor.value, {
+            duration: 1,
+            ease: "power2.in",
+            r: 80 / 255,
+            g: 141 / 255,
+            b: 214 / 255
+        })
+        gsap.to(meshRef.current.material.uniforms.uInnerColor.value, {
+            duration: 1,
+            ease: "power2.in",
+            r: 77 / 255,
+            g: 130 / 255,
+            b: 235 / 255
+        })
+    }
+
     useEffect(()=>{
         mm.add("(min-width: 426px)", () => {
             console.log("not mobile")
@@ -96,6 +121,7 @@ export default function Background()
                 meshRef.current.material.uniforms.uMobile.value = 1
             }
         })
+        // changeBackgroundColor()
     },[])
 
     return <>
