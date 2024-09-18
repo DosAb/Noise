@@ -4,8 +4,8 @@ import { useControls } from 'leva'
 import * as THREE from 'three'
 import gsap from 'gsap'
 
-import fragmentShader from './materials/backgroundMaterial/fragment.glsl'
-import vertexShader from './materials/backgroundMaterial/vertex.glsl'
+import fragmentShader from './materials/backgroundMaterial/fragment.js'
+import vertexShader from './materials/backgroundMaterial/vertex.js'
 
 
 export default function Background()
@@ -88,7 +88,6 @@ export default function Background()
             {
                 meshRef.current.material.uniforms.uMobile.value = 0
             }
-            // this setup code only runs when viewport is at least 800px wide
         })
         mm.add("(max-width: 426px)", () => {
             console.log("mobile")
@@ -96,7 +95,6 @@ export default function Background()
             {
                 meshRef.current.material.uniforms.uMobile.value = 1
             }
-            // this setup code only runs when viewport is at least 800px wide
         })
     },[])
 

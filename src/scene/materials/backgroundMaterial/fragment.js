@@ -1,3 +1,5 @@
+export default /*glsl */
+`
 #define PI 3.1415926
 #define layers 6 //int how many layers
 #define speed .5 //float speed multiplyer
@@ -123,3 +125,4 @@ void main() {
 
     gl_FragColor = vec4(vec3(finalColor), 1.0 - randomNoise);
 }
+`
