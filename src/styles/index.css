@@ -19,3 +19,9 @@ body{
   height: 100dvh;
   pointer-events: none;
 }
+
+section{
+  position: relative;
+  min-height: 100vh;
+  text-align: center;
+}

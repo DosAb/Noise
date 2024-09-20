@@ -1,12 +1,14 @@
-import { useRef, useEffect, useMemo } from 'react'
-import { events, useFrame } from '@react-three/fiber'
+import { useRef, useEffect } from 'react'
+import { useFrame } from '@react-three/fiber'
 import { useControls } from 'leva'
 import * as THREE from 'three'
 import gsap from 'gsap'
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import fragmentShader from './materials/backgroundMaterial/fragment.js'
 import vertexShader from './materials/backgroundMaterial/vertex.js'
 
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Background()
 {
@@ -17,10 +19,22 @@ export default function Background()
     const mouse = new THREE.Vector2(0, 0)
     const lerpedVector = new THREE.Vector2(1.0, 0.5)
     
-    window.addEventListener('mousemove', (event)=>{
-        mouse.x = (event.clientX / window.innerWidth) 
+    function mouseMove(event)
+    {
+        mouse.x = (event.clientX / window.innerWidth)
         mouse.y = ((event.clientY / window.innerHeight))
-    })
+    }
+    
+    function addMouseMove(){
+        window.addEventListener('mousemove', mouseMove)
+    }
+    addMouseMove()
+
+    function removeMouseMove(){
+        window.removeEventListener('mousemove', mouseMove)
+        console.log('removeEventlisterner')
+    }
+
 
 
     const uniforms = {
@@ -66,7 +80,8 @@ export default function Background()
             meshRef.current.material.uniforms.uBackgroundColor.value.r = value.r / 255,
             meshRef.current.material.uniforms.uBackgroundColor.value.g = value.g / 255,
             meshRef.current.material.uniforms.uBackgroundColor.value.b = value.b / 255
-        )} },
+        )}}
+
       })
 
     useFrame((state, delta)=>{
@@ -81,32 +96,61 @@ export default function Background()
         meshRef.current.material.uniforms.uResolution.value.y = window.innerHeight
     })
 
+
+    //Change the colors of the effect
     function changeBackgroundColor()
     {
         gsap.to(meshRef.current.material.uniforms.uColor.value, {
             duration: 1,
             ease: "power2.in",
-            r: 92 / 255,
-            g: 240 / 255,
-            b: 240 / 255
+            r: 43 / 255,
+            g: 255 / 255,
+            b: 255 / 255
         })
         gsap.to(meshRef.current.material.uniforms.uSecondColor.value, {
             duration: 1,
             ease: "power2.in",
-            r: 80 / 255,
-            g: 141 / 255,
-            b: 214 / 255
+            r: 98 / 255,
+            g: 168 / 255,
+            b: 255 / 255
         })
         gsap.to(meshRef.current.material.uniforms.uInnerColor.value, {
             duration: 1,
             ease: "power2.in",
-            r: 77 / 255,
-            g: 130 / 255,
-            b: 235 / 255
+            r: 0 / 255,
+            g: 24 / 255,
+            b: 71 / 255
+        })
+    }
+
+    //Change the colors back
+    function changeBackgroundColorBack()
+    {
+        gsap.to(meshRef.current.material.uniforms.uColor.value, {
+            duration: 1,
+            ease: "power2.in",
+            r: 20 / 255,
+            g: 255 / 255,
+            b: 255 / 255
+        })
+        gsap.to(meshRef.current.material.uniforms.uSecondColor.value, {
+            duration: 1,
+            ease: "power2.in",
+            r: 37 / 255,
+            g: 135 / 255,
+            b: 255 / 255
+        })
+        gsap.to(meshRef.current.material.uniforms.uInnerColor.value, {
+            duration: 1,
+            ease: "power2.in",
+            r: 0 / 255,
+            g: 86 / 255,
+            b: 255 / 255
         })
     }
 
     useEffect(()=>{
+        
         mm.add("(min-width: 426px)", () => {
             console.log("not mobile")
             if(meshRef.current)
@@ -121,8 +165,23 @@ export default function Background()
                 meshRef.current.material.uniforms.uMobile.value = 1
             }
         })
-        // changeBackgroundColor()
+
+        ScrollTrigger.create({
+            trigger: ".second__section",
+            start: "top center",
+            end: `bottom 100px`,
+            markers: false,
+            onEnter: () => {
+                removeMouseMove()
+                changeBackgroundColor()
+            },
+            onLeaveBack: () => {
+                addMouseMove()
+                changeBackgroundColorBack()
+            },
+        })
     },[])
+    
 
     return <>
         <mesh ref={meshRef} >

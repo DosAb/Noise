@@ -22,7 +22,7 @@ export default function Experience()
         }}
     >
         <Background />
-        <Perf position="top-left" />
+        {/* <Perf position="top-left" /> */}
     </Canvas>
     </>
 }
